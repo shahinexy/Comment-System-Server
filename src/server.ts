@@ -1,9 +1,7 @@
 import { Server } from "http";
 import config from "./config";
 import app from "./app";
-import { setupSocketIO } from "./app/modules/SocketIo";
-import { checkPlans } from "./app/modules/PurchasedPlan/purchasedPlan.service";
-import cron from "node-cron";
+import { setupWebSocket } from "./app/modules/WebSocket";
 
 let server: Server;
 
@@ -11,12 +9,8 @@ async function startServer() {
   server = app.listen(config.port, () => {
     console.log("Server is listening on port ", config.port);
   });
-  setupSocketIO(server);
+  setupWebSocket(server);
 }
-
-cron.schedule("0 0 * * *", async () => {
-  await checkPlans();
-});
 
 async function main() {
   await startServer();

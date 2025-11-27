@@ -8,55 +8,84 @@ datasource db {
 }
 
 model User {
-  id               String          @id @default(auto()) @map("_id") @db.ObjectId
-  fullName         String
-  image            String?         @default("")
-  email            String          @unique
-  password         String
-  expirationOtp    DateTime?
-  otp              Int?
-  role             UserRole        @default(USER)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  sentRooms        Room[]          @relation("RoomSender")
-  receivedRooms    Room[]          @relation("RoomReceiver")
-  sentMessages     Chat[]          @relation("ChatSender")
-  receivedMessages Chat[]          @relation("ChatReceiver")
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  fullName       String
+  image          String?         @default("")
+  email          String          @unique
+  password       String
+  expirationOtp  DateTime?
+  otp            Int?
+  role           UserRole        @default(USER)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  posts          Post[]
+  postReactions  PostReaction[]
+  postComments   PostComment[]
+  commentReplays CommentReplay[]
 
   @@map("Users")
 }
 
-model Room {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  senderId   String   @db.ObjectId
-  receiverId String   @db.ObjectId
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  sender     User     @relation("RoomSender", fields: [senderId], references: [id])
-  receiver   User     @relation("RoomReceiver", fields: [receiverId], references: [id])
-  chat       Chat[]
+model Post {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  description   String
+  image         String?        @default("")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String         @db.ObjectId
+  postReactions PostReaction[]
+  postComments  PostComment[]
 
-  @@map("rooms")
+  @@map("Posts")
 }
 
-model Chat {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  message    String
-  images     String?  @default("")
-  isRead     Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  senderId   String   @db.ObjectId
-  receiverId String   @db.ObjectId
-  roomId     String   @db.ObjectId
-  sender     User     @relation("ChatSender", fields: [senderId], references: [id])
-  receiver   User     @relation("ChatReceiver", fields: [receiverId], references: [id])
-  room       Room     @relation(fields: [roomId], references: [id])
+model PostReaction {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  reactionType ReactionType
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id])
+  userId       String       @db.ObjectId
+  post         Post         @relation(fields: [postId], references: [id])
+  postId       String       @db.ObjectId
 
-  @@map("chats")
+  @@map("Post-Reactions")
+}
+
+model PostComment {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  description    String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id])
+  userId         String          @db.ObjectId
+  post           Post            @relation(fields: [postId], references: [id])
+  postId         String          @db.ObjectId
+  commentReplays CommentReplay[]
+
+  @@map("Post-Comments")
+}
+
+model CommentReplay {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  description   String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String      @db.ObjectId
+  postComment   PostComment @relation(fields: [postCommentId], references: [id])
+  postCommentId String      @db.ObjectId
+
+  @@map("Comment-Replays")
 }
 
 enum UserRole {
   ADMIN
   USER
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
 }
