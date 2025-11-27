@@ -6,9 +6,9 @@ export type TUser = {
   email: string;
   password: string;
   role: UserRole;
-  isDeleted: boolean;
   expirationOtp?: Date;
   otp?: number;
+  verifiedEmail: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 };

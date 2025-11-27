@@ -16,6 +16,7 @@ model User {
   expirationOtp  DateTime?
   otp            Int?
   role           UserRole        @default(USER)
+  verifiedEmail  Boolean @default(false)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   posts          Post[]

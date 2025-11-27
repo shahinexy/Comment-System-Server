@@ -3,7 +3,7 @@ import ApiError from "../../../errors/ApiErrors";
 import * as bcrypt from "bcrypt";
 import { IPaginationOptions } from "../../../interfaces/paginations";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { Prisma, User } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { userSearchAbleFields } from "./user.costant";
 import config from "../../../config";
 import { fileUploader } from "../../../helpers/fileUploader";
@@ -53,7 +53,7 @@ const createUserIntoDb = async (payload: TUser) => {
 
     <div style="background-color: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; color: #999999;">
       Best regards,<br/>
-      <strong style="color: #0A4225;">Humkadam Team</strong>
+      <strong style="color: #0A4225;">Comment System Team</strong>
     </div>
 
   </div>
@@ -166,6 +166,7 @@ const getMyProfile = async (userEmail: string) => {
       id: true,
       fullName: true,
       email: true,
+      image: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -174,9 +175,19 @@ const getMyProfile = async (userEmail: string) => {
   return userProfile;
 };
 
-const updateProfile = async (payload: User, imageFile: any, userId: string) => {
+const updateProfile = async (
+  payload: Partial<TUser>,
+  imageFile: any,
+  userId: string
+) => {
   const result = await prisma.$transaction(async (prisma) => {
-    let image = "";
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+
+    let image = user?.id;
+
     if (imageFile) {
       image = (await fileUploader.uploadToCloudinary(imageFile)).Location;
     }

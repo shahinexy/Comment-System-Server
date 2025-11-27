@@ -16,7 +16,6 @@ const loginUser = async (payload: { email: string; password: string }) => {
     select: {
       id: true,
       verifiedEmail: true,
-      activePlan: true,
       email: true,
       password: true,
       role: true,
@@ -66,13 +65,13 @@ const loginUser = async (payload: { email: string; password: string }) => {
 
     <div style="background-color: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; color: #999999;">
       Best regards,<br/>
-      <strong style="color: #0A4225;">Humkadam Team</strong>
+      <strong style="color: #0A4225;">Comment System Team</strong>
     </div>
 
   </div>
 </div>`;
 
-    await emailSender(userData.email, html, "Email varification OTP");
+    await emailSender(userData.email, html, "Email verification OTP");
 
     await prisma.user.update({
       where: { id: userData.id },
@@ -101,7 +100,6 @@ const loginUser = async (payload: { email: string; password: string }) => {
   return {
     role: userData.role,
     verifiedEmail: userData.verifiedEmail,
-    activePlan: userData.activePlan,
     token: accessToken,
   };
 };
@@ -183,7 +181,7 @@ const forgotPassword = async (payload: { email: string }) => {
 
     <div style="background-color: #f1f4f2; text-align: center; padding: 15px; font-size: 12px; color: #777;">
       <p style="margin: 0;">Best regards,<br/>
-      <strong style="color: #0A4225;">Humkadam Team</strong></p>
+      <strong style="color: #0A4225;">Comment System Team</strong></p>
     </div>
   </div>
 </div>
@@ -245,7 +243,7 @@ const resendOtp = async (email: string) => {
     <!-- Footer -->
     <div style="background-color: #f1f4f2; text-align: center; padding: 15px; font-size: 12px; color: #777;">
       <p style="margin: 0;">Best regards,<br/>
-      <strong style="color: #0A4225;">Humkadam Team</strong></p>
+      <strong style="color: #0A4225;">Comment System Team</strong></p>
     </div>
   </div>
 </div>
@@ -293,6 +291,7 @@ const verifyOtp = async (payload: { email: string; otp: number }) => {
     data: {
       otp: null,
       expirationOtp: null,
+      verifiedEmail: true,
     },
   });
 
