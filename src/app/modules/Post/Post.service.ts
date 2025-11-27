@@ -22,6 +22,96 @@ const createPostIntoDb = async (
 
 const getPostsFromDb = async (
   params: IPostFilterRequest,
+  options: IPaginationOptions,
+  userId: string
+) => {
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  const { searchTerm, ...filterData } = params;
+
+  const andConditions: Prisma.PostWhereInput[] = [];
+
+  if (params.searchTerm) {
+    andConditions.push({
+      OR: PostSearchAbleFields.map((field) => ({
+        [field]: {
+          contains: params.searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: (filterData as any)[key],
+        },
+      })),
+    });
+  }
+  const whereConditions: Prisma.PostWhereInput = { AND: andConditions };
+
+  const posts = await prisma.post.findMany({
+    where: whereConditions,
+    skip,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
+
+    select: {
+      id: true,
+      description: true,
+      image: true,
+      createdAt: true,
+      user: { select: { fullName: true, image: true } },
+      _count: { select: { postComments: true } },
+      postReactions: { select: { reactionType: true, userId: true } },
+    },
+  });
+
+  const total = await prisma.post.count({
+    where: whereConditions,
+  });
+
+  const result = posts.map((p) => ({
+    id: p.id,
+    description: p.description,
+    image: p.image,
+    user: p.user,
+    likeCount: p.postReactions.filter((r) => r.reactionType === "LIKE").length,
+    dislikeCount: p.postReactions.filter((r) => r.reactionType === "DISLIKE")
+      .length,
+    commentCount: p._count.postComments,
+    viewerReaction: p.postReactions.find((r) => r.userId === userId),
+    createdAt: p.createdAt,
+  }));
+
+  if (params.filter === "mostLiked") {
+    result.sort((a, b) => b.likeCount - a.likeCount);
+  }
+
+  if (params.filter === "mostDisliked") {
+    result.sort((a, b) => b.dislikeCount - a.dislikeCount);
+  }
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
+const allPosts = async (
+  params: IPostFilterRequest,
   options: IPaginationOptions
 ) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
@@ -108,7 +198,7 @@ const getPostsFromDb = async (
   };
 };
 
-const getSinglePost = async (id: string) => {
+const getSinglePost = async (id: string, userId: string) => {
   const res = await prisma.post.findUnique({
     where: { id },
     select: {
@@ -118,7 +208,7 @@ const getSinglePost = async (id: string) => {
       createdAt: true,
       user: { select: { fullName: true, image: true } },
       _count: { select: { postComments: true } },
-      postReactions: { select: { reactionType: true } },
+      postReactions: { select: { reactionType: true, userId: true } },
     },
   });
 
@@ -136,6 +226,7 @@ const getSinglePost = async (id: string) => {
     dislikeCount: res.postReactions.filter((r) => r.reactionType === "DISLIKE")
       .length,
     commentCount: res._count.postComments,
+    viewerReaction: res.postReactions.find((r) => r.userId === userId) || null,
     createdAt: res.createdAt,
   };
 };
@@ -144,4 +235,5 @@ export const PostService = {
   createPostIntoDb,
   getPostsFromDb,
   getSinglePost,
+  allPosts,
 };

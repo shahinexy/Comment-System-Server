@@ -19,7 +19,21 @@ const createPost = catchAsync(async (req, res) => {
 const getPosts = catchAsync(async (req, res) => {
   const filters = pick(req.query, PostFilterableFields);
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-  const result = await PostService.getPostsFromDb(filters, options);
+  const result = await PostService.getPostsFromDb(
+    filters,
+    options,
+    req.user.id
+  );
+  sendResponse(res, {
+    message: "Posts retrieved successfully!",
+    data: result,
+  });
+});
+
+const allPosts = catchAsync(async (req, res) => {
+  const filters = pick(req.query, PostFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+  const result = await PostService.allPosts(filters, options);
   sendResponse(res, {
     message: "Posts retrieved successfully!",
     data: result,
@@ -27,17 +41,16 @@ const getPosts = catchAsync(async (req, res) => {
 });
 
 const getSinglePost = catchAsync(async (req, res) => {
-  const result = await PostService.getSinglePost(req.params.id);
+  const result = await PostService.getSinglePost(req.params.id, req.user.id);
   sendResponse(res, {
     message: "Post profile retrieved successfully",
     data: result,
   });
 });
 
-
-
 export const PostController = {
   createPost,
   getPosts,
   getSinglePost,
+  allPosts,
 };

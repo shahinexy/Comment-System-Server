@@ -2,6 +2,7 @@ import { Server } from "http";
 import config from "./config";
 import app from "./app";
 import { setupWebSocket } from "./app/modules/WebSocket";
+import { setupSocketIO } from "./app/modules/SocketIo";
 
 let server: Server;
 
@@ -9,7 +10,8 @@ async function startServer() {
   server = app.listen(config.port, () => {
     console.log("Server is listening on port ", config.port);
   });
-  setupWebSocket(server);
+  setupSocketIO(server);
+  // setupWebSocket(server);
 }
 
 async function main() {

@@ -10,7 +10,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(PostController.getPosts)
+  .get(auth(), PostController.getPosts)
   .post(
     auth(UserRole.USER),
     fileUploader.uploadSingle,
@@ -22,6 +22,8 @@ router
     PostController.createPost
   );
 
-  router.route("/:id").get(auth(), PostController.getSinglePost)
+router.route("/for-everyone").get(PostController.allPosts);
+
+router.route("/:id").get(auth(), PostController.getSinglePost);
 
 export const PostRoutes = router;

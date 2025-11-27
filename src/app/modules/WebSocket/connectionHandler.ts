@@ -30,7 +30,6 @@ export function handleConnection(ws: ExtendedWebSocket, wss: WebSocketServer) {
 
   ws.on("close", () => {
     if (ws.userId) {
-      // update shared state
     }
   });
 }
