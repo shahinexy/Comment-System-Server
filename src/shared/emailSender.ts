@@ -27,8 +27,6 @@ export const emailSender = async (
 
     return info.messageId;
   } catch (error) {
-    // @ts-ignore
-    console.error(`Error sending email: ${error.message}`);
     throw new Error("Failed to send email. Please try again later.");
   }
 };

@@ -1,7 +1,7 @@
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
 import * as bcrypt from "bcrypt";
-import { IPaginationOptions } from "../../../interfaces/paginations";
+import { IPaginationOptions } from "../../../interfaces/pagination";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import { Prisma, User } from "@prisma/client";
 import { userSearchAbleFields } from "./demo.costant";

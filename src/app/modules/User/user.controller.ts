@@ -2,7 +2,7 @@ import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { userService } from "./user.service";
 import pick from "../../../shared/pick";
-import { userFilterableFields } from "./user.costant";
+import { userFilterableFields } from "./user.constant";
 
 const createUser = catchAsync(async (req, res) => {
   const result = await userService.createUserIntoDb(req.body);

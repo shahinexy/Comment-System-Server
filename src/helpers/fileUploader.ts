@@ -62,7 +62,6 @@ const uploadToCloudinary = async (
       }
     );
 
-    // Convert buffer to stream and upload
     streamifier.createReadStream(file.buffer).pipe(uploadStream);
   });
 };

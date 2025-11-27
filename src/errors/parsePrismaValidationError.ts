@@ -1,6 +1,6 @@
 // Function to parse Prisma validation error messages
  const parsePrismaValidationError = (errorMessage: string) => {
-    // Parse missing argument errors
+
     const missingFieldsRegex = /Argument `(.+?)` is missing\./g;
     let match;
     const missingFields: string[] = [];
@@ -9,7 +9,6 @@
       missingFields.push(match[1]);
     }
   
-    // Parse invalid value errors
     const invalidValueRegex =
       /Argument `(.+?)`: Invalid value provided. Expected (.+), provided (.+)\./g;
     const invalidValues: string[] = [];
