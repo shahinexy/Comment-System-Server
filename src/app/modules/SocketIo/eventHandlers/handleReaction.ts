@@ -63,11 +63,10 @@ export async function handleReaction(
       viewerReaction,
     };
 
-    io.emit("reactionUpdated", updatePayload);
+    io.to(postId).emit("reactionUpdated", updatePayload);
 
     socket.emit("reactionUpdated", updatePayload);
   } catch (err: any) {
-    console.error("Reaction Error:", err);
     socket.emit("socketError", {
       code: "REACTION_ERROR",
       message: "Failed to update reaction.",

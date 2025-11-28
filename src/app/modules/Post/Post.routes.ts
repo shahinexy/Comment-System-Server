@@ -26,4 +26,8 @@ router.route("/for-everyone").get(PostController.allPosts);
 
 router.route("/:id").get(auth(), PostController.getSinglePost);
 
+router.route("/:id/comments").get(auth(), PostController.postComments);
+
+router.route("/comments/:id").get(auth(), PostController.commentReplies);
+
 export const PostRoutes = router;

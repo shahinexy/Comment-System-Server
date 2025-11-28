@@ -1,10 +1,14 @@
 import prisma from "../../../shared/prisma";
 import { IPaginationOptions } from "../../../interfaces/pagination";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { Prisma, Post } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { PostSearchAbleFields } from "./Post.constant";
 import { fileUploader } from "../../../helpers/fileUploader";
-import { IPostFilterRequest, TPost } from "./Post.interface";
+import {
+  ICommentFilterRequest,
+  IPostFilterRequest,
+  TPost,
+} from "./Post.interface";
 import ApiError from "../../../errors/ApiErrors";
 import httpStatus from "http-status";
 
@@ -26,7 +30,6 @@ const getPostsFromDb = async (
   userId: string
 ) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
-  const { searchTerm, ...filterData } = params;
 
   const andConditions: Prisma.PostWhereInput[] = [];
 
@@ -41,20 +44,12 @@ const getPostsFromDb = async (
     });
   }
 
-  if (Object.keys(filterData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
-    });
-  }
   const whereConditions: Prisma.PostWhereInput = { AND: andConditions };
 
   const posts = await prisma.post.findMany({
     where: whereConditions,
     skip,
+    take: limit,
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -66,7 +61,7 @@ const getPostsFromDb = async (
 
     select: {
       id: true,
-      description: true,
+      content: true,
       image: true,
       createdAt: true,
       user: { select: { fullName: true, image: true } },
@@ -81,7 +76,7 @@ const getPostsFromDb = async (
 
   const result = posts.map((p) => ({
     id: p.id,
-    description: p.description,
+    description: p.content,
     image: p.image,
     user: p.user,
     likeCount: p.postReactions.filter((r) => r.reactionType === "LIKE").length,
@@ -115,7 +110,6 @@ const allPosts = async (
   options: IPaginationOptions
 ) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
-  const { searchTerm, ...filterData } = params;
 
   const andConditions: Prisma.PostWhereInput[] = [];
 
@@ -130,20 +124,12 @@ const allPosts = async (
     });
   }
 
-  if (Object.keys(filterData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
-    });
-  }
   const whereConditions: Prisma.PostWhereInput = { AND: andConditions };
 
   const posts = await prisma.post.findMany({
     where: whereConditions,
     skip,
+    take: limit,
     orderBy:
       options.sortBy && options.sortOrder
         ? {
@@ -155,7 +141,7 @@ const allPosts = async (
 
     select: {
       id: true,
-      description: true,
+      content: true,
       image: true,
       createdAt: true,
       user: { select: { fullName: true, image: true } },
@@ -170,7 +156,7 @@ const allPosts = async (
 
   const result = posts.map((p) => ({
     id: p.id,
-    description: p.description,
+    description: p.content,
     image: p.image,
     user: p.user,
     likeCount: p.postReactions.filter((r) => r.reactionType === "LIKE").length,
@@ -203,7 +189,7 @@ const getSinglePost = async (id: string, userId: string) => {
     where: { id },
     select: {
       id: true,
-      description: true,
+      content: true,
       image: true,
       createdAt: true,
       user: { select: { fullName: true, image: true } },
@@ -218,7 +204,7 @@ const getSinglePost = async (id: string, userId: string) => {
 
   return {
     id: res.id,
-    description: res.description,
+    description: res.content,
     image: res.image,
     user: res.user,
     likeCount: res.postReactions.filter((r) => r.reactionType === "LIKE")
@@ -231,9 +217,81 @@ const getSinglePost = async (id: string, userId: string) => {
   };
 };
 
+const postComments = async (
+  params: ICommentFilterRequest,
+  options: IPaginationOptions
+) => {
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  const { searchTerm, ...filterData } = params;
+
+  const andConditions: Prisma.PostCommentWhereInput[] = [];
+
+  if (params.searchTerm) {
+    andConditions.push({
+      OR: PostSearchAbleFields.map((field) => ({
+        [field]: {
+          contains: params.searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: (filterData as any)[key],
+        },
+      })),
+    });
+  }
+  const whereConditions: Prisma.PostCommentWhereInput = { AND: andConditions };
+
+  const result = await prisma.postComment.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? {
+            [options.sortBy]: options.sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
+
+    include: { user: { select: { id: true, fullName: true, image: true } } },
+  });
+
+  const total = await prisma.postComment.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
+const commentReplies = async (commentId: string) => {
+  const replies = await prisma.commentReply.findMany({
+    orderBy: { createdAt: "asc" },
+    include: { user: { select: { id: true, fullName: true, image: true } } },
+  });
+
+  return replies;
+};
+
 export const PostService = {
   createPostIntoDb,
   getPostsFromDb,
   getSinglePost,
   allPosts,
+  postComments,
+  commentReplies,
 };

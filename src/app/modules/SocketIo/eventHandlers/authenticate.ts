@@ -54,7 +54,6 @@ export async function handleAuthenticate(
       userId: user.id,
     });
   } catch (err) {
-    console.error("Authentication error:", err);
     socket.disconnect(true);
   }
 }

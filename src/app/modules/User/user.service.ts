@@ -79,6 +79,7 @@ const getUsersFromDb = async (
   const result = await prisma.user.findMany({
     where: whereConditions,
     skip,
+    take: limit,
     orderBy:
       options.sortBy && options.sortOrder
         ? {

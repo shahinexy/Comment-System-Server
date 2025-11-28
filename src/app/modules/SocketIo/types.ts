@@ -6,12 +6,8 @@ export interface ExtendedSocket extends Socket {
 
 export type SocketEvent =
   | "authenticate"
-  | "message"
-  | "fetchChats"
-  | "unReadMessages"
-  | "messageList"
-  | "userStatus"
-  | "myAdminChats"
-  | "messageToTrainer"
-  | "messageToNutritionist"
-  | "adminMessageList";
+  | "reactPost"
+  | "createComment"
+  | "createCommentReply"
+  | "updateComment"
+  | "deleteComment";

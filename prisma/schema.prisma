@@ -8,28 +8,28 @@ datasource db {
 }
 
 model User {
-  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
   fullName       String
-  image          String?         @default("")
-  email          String          @unique
+  image          String?        @default("")
+  email          String         @unique
   password       String
   expirationOtp  DateTime?
   otp            Int?
-  role           UserRole        @default(USER)
-  verifiedEmail  Boolean @default(false)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  role           UserRole       @default(USER)
+  verifiedEmail  Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   posts          Post[]
   postReactions  PostReaction[]
   postComments   PostComment[]
-  commentReplays CommentReplay[]
+  commentReplies CommentReply[]
 
   @@map("Users")
 }
 
 model Post {
   id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  description   String
+  content       String
   image         String?        @default("")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -52,27 +52,26 @@ model PostReaction {
   postId       String       @db.ObjectId
 
   @@unique([postId, userId])
-  
   @@map("Post-Reactions")
 }
 
 model PostComment {
-  id             String          @id @default(auto()) @map("_id") @db.ObjectId
-  description    String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  user           User            @relation(fields: [userId], references: [id])
-  userId         String          @db.ObjectId
-  post           Post            @relation(fields: [postId], references: [id])
-  postId         String          @db.ObjectId
-  commentReplays CommentReplay[]
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  content        String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id])
+  userId         String         @db.ObjectId
+  post           Post           @relation(fields: [postId], references: [id])
+  postId         String         @db.ObjectId
+  commentReplies CommentReply[]
 
   @@map("Post-Comments")
 }
 
-model CommentReplay {
+model CommentReply {
   id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  description   String
+  content       String
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   user          User        @relation(fields: [userId], references: [id])
@@ -80,7 +79,7 @@ model CommentReplay {
   postComment   PostComment @relation(fields: [postCommentId], references: [id])
   postCommentId String      @db.ObjectId
 
-  @@map("Comment-Replays")
+  @@map("Comment-Replies")
 }
 
 enum UserRole {
