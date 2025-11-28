@@ -264,34 +264,11 @@ const verifyOtp = async (payload: { email: string; otp: number }) => {
   };
 };
 
-const resetPassword = async (payload: { password: string; email: string }) => {
-  const user = await prisma.user.findUnique({
-    where: { email: payload.email },
-  });
-
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "This user is not found!");
-  }
-
-  const hashedPassword = await bcrypt.hash(payload.password, 10);
-
-  await prisma.user.update({
-    where: { email: payload.email },
-    data: {
-      password: hashedPassword,
-      otp: null,
-      expirationOtp: null,
-    },
-  });
-
-  return { message: "Password reset successfully" };
-};
 
 export const AuthServices = {
   loginUser,
   changePassword,
   forgotPassword,
-  resetPassword,
   resendOtp,
   verifyOtp,
 };

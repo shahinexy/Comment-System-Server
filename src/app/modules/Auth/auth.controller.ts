@@ -64,20 +64,11 @@ const verifyOtp = catchAsync(
   }
 );
 
-const resetPassword = catchAsync(async (req, res) => {
-  await AuthServices.resetPassword(req.body);
-  sendResponse(res, {
-    message: "Password Reset!",
-    data: null,
-  });
-});
-
 export const AuthController = {
   loginUser,
   logoutUser,
   changePassword,
   forgotPassword,
-  resetPassword,
   resendOtp,
   verifyOtp,
 };

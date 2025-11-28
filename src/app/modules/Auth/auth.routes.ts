@@ -33,10 +33,4 @@ router.post(
   AuthController.verifyOtp
 );
 
-router.post(
-  "/reset-password",
-  auth(UserRole.USER, UserRole.ADMIN),
-  AuthController.resetPassword
-);
-
 export const AuthRoutes = router;
