@@ -24,40 +24,10 @@ const createPostIntoDb = async (
   return res;
 };
 
-const getPostsFromDb = async (
-  params: IPostFilterRequest,
-  options: IPaginationOptions,
-  userId: string
-) => {
-  const { page, limit, skip } = paginationHelper.calculatePagination(options);
-
-  const andConditions: Prisma.PostWhereInput[] = [];
-
-  if (params.searchTerm) {
-    andConditions.push({
-      OR: PostSearchAbleFields.map((field) => ({
-        [field]: {
-          contains: params.searchTerm,
-          mode: "insensitive",
-        },
-      })),
-    });
-  }
-
-  const whereConditions: Prisma.PostWhereInput = { AND: andConditions };
-
+const getPostsFromDb = async (params: IPostFilterRequest, userId: string) => {
   const posts = await prisma.post.findMany({
-    where: whereConditions,
-    skip,
-    take: limit,
-    orderBy:
-      options.sortBy && options.sortOrder
-        ? {
-            [options.sortBy]: options.sortOrder,
-          }
-        : {
-            createdAt: "desc",
-          },
+    take: 50,
+    orderBy: { createdAt: "desc" },
 
     select: {
       id: true,
@@ -68,10 +38,6 @@ const getPostsFromDb = async (
       _count: { select: { postComments: true } },
       postReactions: { select: { reactionType: true, userId: true } },
     },
-  });
-
-  const total = await prisma.post.count({
-    where: whereConditions,
   });
 
   const result = posts.map((p) => ({
@@ -96,48 +62,16 @@ const getPostsFromDb = async (
   }
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
     data: result,
   };
 };
 
 const allPosts = async (
   params: IPostFilterRequest,
-  options: IPaginationOptions
 ) => {
-  const { page, limit, skip } = paginationHelper.calculatePagination(options);
-
-  const andConditions: Prisma.PostWhereInput[] = [];
-
-  if (params.searchTerm) {
-    andConditions.push({
-      OR: PostSearchAbleFields.map((field) => ({
-        [field]: {
-          contains: params.searchTerm,
-          mode: "insensitive",
-        },
-      })),
-    });
-  }
-
-  const whereConditions: Prisma.PostWhereInput = { AND: andConditions };
-
   const posts = await prisma.post.findMany({
-    where: whereConditions,
-    skip,
-    take: limit,
-    orderBy:
-      options.sortBy && options.sortOrder
-        ? {
-            [options.sortBy]: options.sortOrder,
-          }
-        : {
-            createdAt: "desc",
-          },
+    take: 50,
+    orderBy: { createdAt: "desc" },
 
     select: {
       id: true,
@@ -148,10 +82,6 @@ const allPosts = async (
       _count: { select: { postComments: true } },
       postReactions: { select: { reactionType: true } },
     },
-  });
-
-  const total = await prisma.post.count({
-    where: whereConditions,
   });
 
   const result = posts.map((p) => ({
@@ -175,11 +105,6 @@ const allPosts = async (
   }
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
     data: result,
   };
 };

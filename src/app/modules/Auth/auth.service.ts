@@ -15,11 +15,11 @@ const loginUser = async (payload: { email: string; password: string }) => {
     },
     select: {
       id: true,
-      verifiedEmail: true,
+      fullName: true,
       email: true,
+      image: true,
       password: true,
       role: true,
-      otp: true,
       expirationOtp: true,
     },
   });
@@ -50,8 +50,11 @@ const loginUser = async (payload: { email: string; password: string }) => {
   );
 
   return {
-    role: userData.role,
-    verifiedEmail: userData.verifiedEmail,
+    user: {
+      id: userData.id,
+      fullName: userData.fullName,
+      image: userData.image,
+    },
     token: accessToken,
   };
 };
@@ -263,7 +266,6 @@ const verifyOtp = async (payload: { email: string; otp: number }) => {
     token: accessToken,
   };
 };
-
 
 export const AuthServices = {
   loginUser,

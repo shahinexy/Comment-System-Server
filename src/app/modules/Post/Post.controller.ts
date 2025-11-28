@@ -18,10 +18,8 @@ const createPost = catchAsync(async (req, res) => {
 
 const getPosts = catchAsync(async (req, res) => {
   const filters = pick(req.query, PostFilterableFields);
-  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
   const result = await PostService.getPostsFromDb(
     filters,
-    options,
     req.user.id
   );
   sendResponse(res, {
@@ -32,8 +30,7 @@ const getPosts = catchAsync(async (req, res) => {
 
 const allPosts = catchAsync(async (req, res) => {
   const filters = pick(req.query, PostFilterableFields);
-  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-  const result = await PostService.allPosts(filters, options);
+  const result = await PostService.allPosts(filters);
   sendResponse(res, {
     message: "Posts retrieved successfully.",
     data: result,
