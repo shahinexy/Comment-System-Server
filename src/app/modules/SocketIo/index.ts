@@ -11,7 +11,6 @@ export function setupSocketIO(server: Server) {
   });
 
   io.on("connection", (socket: Socket)=>{
-    console.log("Socket.IO connection established:", socket.id);
     handleConnection(socket, io)
   })
 
