@@ -113,6 +113,6 @@ npm run dev
 #### 4. Frontend URL:
 
 ```
-npm run dev
+http://localhost:2025
 ```
 
