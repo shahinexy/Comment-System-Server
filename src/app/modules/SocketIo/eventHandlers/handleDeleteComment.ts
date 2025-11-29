@@ -42,6 +42,10 @@ export const handleDeleteComment = async (
         });
       }
 
+      await prisma.commentReply.deleteMany({
+        where: { postCommentId: commentId },
+      });
+
       await prisma.postComment.delete({ where: { id: commentId } });
 
       payload = {
