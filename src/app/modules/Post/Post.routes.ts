@@ -24,7 +24,14 @@ router
 
 router.route("/for-everyone").get(PostController.allPosts);
 
-router.route("/:id").get(auth(), PostController.getSinglePost);
+router
+  .route("/:id")
+  .get(auth(), PostController.getSinglePost)
+  .post(
+    auth(),
+    // validateRequest(PostValidation.PostReactSchema),
+    PostController.reactPost
+  );
 
 router.route("/:id/comments").get(auth(), PostController.postComments);
 

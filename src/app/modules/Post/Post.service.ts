@@ -66,9 +66,7 @@ const getPostsFromDb = async (params: IPostFilterRequest, userId: string) => {
   };
 };
 
-const allPosts = async (
-  params: IPostFilterRequest,
-) => {
+const allPosts = async (params: IPostFilterRequest) => {
   const posts = await prisma.post.findMany({
     take: 50,
     orderBy: { createdAt: "desc" },
@@ -144,7 +142,8 @@ const getSinglePost = async (id: string, userId: string) => {
 
 const postComments = async (
   params: ICommentFilterRequest,
-  options: IPaginationOptions
+  options: IPaginationOptions,
+  postId: string
 ) => {
   const { page, limit, skip } = paginationHelper.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
@@ -174,7 +173,7 @@ const postComments = async (
   const whereConditions: Prisma.PostCommentWhereInput = { AND: andConditions };
 
   const result = await prisma.postComment.findMany({
-    where: whereConditions,
+    where: { ...whereConditions, postId },
     skip,
     take: limit,
     orderBy:
@@ -190,7 +189,7 @@ const postComments = async (
   });
 
   const total = await prisma.postComment.count({
-    where: whereConditions,
+    where: { ...whereConditions, postId },
   });
 
   return {
@@ -205,11 +204,52 @@ const postComments = async (
 
 const commentReplies = async (commentId: string) => {
   const replies = await prisma.commentReply.findMany({
+    where: { postCommentId: commentId },
     orderBy: { createdAt: "asc" },
     include: { user: { select: { id: true, fullName: true, image: true } } },
   });
 
   return replies;
+};
+
+const reactPost = async (
+  payload: { reactionType: "LIKE" | "DISLIKE" },
+  postId: string,
+  userId: string
+) => {
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    select: { id: true },
+  });
+
+  if (!post) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Post not found");
+  }
+
+  const existingReaction = await prisma.postReaction.findFirst({
+    where: { postId, userId: userId },
+    select: { id: true, reactionType: true, userId: true },
+  });
+
+  if (
+    existingReaction &&
+    existingReaction.reactionType === payload.reactionType
+  ) {
+    await prisma.postReaction.delete({
+      where: { id: existingReaction.id },
+    });
+  } else if (existingReaction) {
+    await prisma.postReaction.update({
+      where: { id: existingReaction.id },
+      data: { reactionType: payload.reactionType },
+    });
+  } else {
+    await prisma.postReaction.create({
+      data: { postId, userId: userId, reactionType: payload.reactionType },
+    });
+  }
+
+  return { message: "Post reacted success" };
 };
 
 export const PostService = {
@@ -219,4 +259,5 @@ export const PostService = {
   allPosts,
   postComments,
   commentReplies,
+  reactPost,
 };

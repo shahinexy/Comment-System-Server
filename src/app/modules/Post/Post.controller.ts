@@ -18,10 +18,7 @@ const createPost = catchAsync(async (req, res) => {
 
 const getPosts = catchAsync(async (req, res) => {
   const filters = pick(req.query, PostFilterableFields);
-  const result = await PostService.getPostsFromDb(
-    filters,
-    req.user.id
-  );
+  const result = await PostService.getPostsFromDb(filters, req.user.id);
   sendResponse(res, {
     message: "Posts retrieved successfully.",
     data: result,
@@ -48,7 +45,11 @@ const getSinglePost = catchAsync(async (req, res) => {
 const postComments = catchAsync(async (req, res) => {
   const filters = pick(req.query, PostFilterableFields);
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-  const result = await PostService.postComments(filters, options);
+  const result = await PostService.postComments(
+    filters,
+    options,
+    req.params.id
+  );
   sendResponse(res, {
     message: "Post comments retrieved successfully.",
     data: result,
@@ -63,11 +64,24 @@ const commentReplies = catchAsync(async (req, res) => {
   });
 });
 
+const reactPost = catchAsync(async (req, res) => {
+  const result = await PostService.reactPost(
+    req.body,
+    req.params.id,
+    req.user.id
+  );
+  sendResponse(res, {
+    message: "Post reacted success.",
+    data: result,
+  });
+});
+
 export const PostController = {
   createPost,
   getPosts,
   getSinglePost,
   allPosts,
   postComments,
-  commentReplies
+  commentReplies,
+  reactPost
 };
