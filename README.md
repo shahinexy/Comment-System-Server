@@ -117,7 +117,7 @@ http://localhost:5173
 ```
 
 
-## Server Base URL
+## Server Base URL & Endpoints
 
 ```
 http://localhost:2025/api/v1
@@ -149,3 +149,6 @@ http://localhost:2025/api/v1
 | `/posts/:id`                      | GET    | Yes           | Get single post                      |
 | `/posts/:id/comments`             | GET    | Yes           | Get comments of a post               |
 | `/posts/comments/:id`             | GET    | Yes           | Get replies to a specific comment    |
+
+
+### Post comment, Comment edit, and deleted those API are handled by Socket.Io for real life update.
