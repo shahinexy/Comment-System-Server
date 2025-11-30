@@ -103,7 +103,7 @@ npm install
 ```
 
 
-#### 3. Run the server in development mode
+#### 3. Run the frontend in development mode
 
 ```
 npm run dev
@@ -113,6 +113,39 @@ npm run dev
 #### 4. Frontend URL:
 
 ```
-http://localhost:2025
+http://localhost:5173
 ```
 
+
+## Server Base URL
+
+```
+http://localhost:2025/api/v1
+```
+
+#### Auth Routes
+| Endpoint                  | Method | Description                       |
+|---------------------------|--------|-----------------------------------|
+| `/auth/login`             | POST   | Login user and save token         |
+| `/auth/forgot-password`   | POST   | Send reset OTP                    |
+| `/auth/verify-otp`        | POST   | Verify OTP                        |
+| `/auth/resend-otp`        | POST   | Resend OTP                        |
+| `/auth/reset-password`    | POST   | Reset password after OTP          |
+
+#### User Routes
+| Endpoint             | Method | Auth Required | Description                     |
+|----------------------|--------|---------------|---------------------------------|
+| `/users`             | POST   | No            | Register new user               |
+| `/users`             | GET    | No            | Get all users (paginated)       |
+| `/users/profile`     | GET    | Yes           | Get logged-in user profile      |
+| `/users/profile`     | PUT    | Yes           | Update profile (name + image)   |
+
+#### Post & Comment System
+| Endpoint                          | Method | Auth Required | Description                          |
+|-----------------------------------|--------|---------------|--------------------------------------|
+| `/posts`                          | POST   | Yes           | Create post (text + optional image)  |
+| `/posts`                          | GET    | Yes           | Get all posts (with reactions)       |
+| `/posts/for-everyone`             | GET    | No            | Public posts (no auth needed)        |
+| `/posts/:id`                      | GET    | Yes           | Get single post                      |
+| `/posts/:id/comments`             | GET    | Yes           | Get comments of a post               |
+| `/posts/comments/:id`             | GET    | Yes           | Get replies to a specific comment    |
